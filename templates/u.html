@@ -20,6 +20,8 @@
 		<br>
 		<input type="text" name="email" placeholder="Email" value="{{user.email if user.email != None}}" size="50">
 		<br>
+		<input type="text" name="password" placeholder="Password" size="50">
+		<br>
 	</fieldset>
 	<fieldset>
 		<legend>Delivery address</legend>
@@ -31,6 +33,9 @@
 		<br>
 		<input type="text" name="delivery_city" placeholder="City"
 		       value="{{delivery_address.city if delivery_address.city != None}}">
+		<br>
+		<input type="text" name="delivery_state" placeholder="State"
+		       value="{{delivery_address.state if delivery_address.state != None}}">
 		<br>
 		<input type="text" name="delivery_zip_code" placeholder="Zip code"
 		       value="{{delivery_address.zip_code if delivery_address.zip_code != None}}" size="10">
@@ -72,6 +77,8 @@
 		<input type="text" name="billing_address_line_2" placeholder="Billing address line 2" size="50">
 		<br>
 		<input type="text" name="billing_city" placeholder="City">
+		<br>
+		<input type="text" name="billing_state" placeholder="State">
 		<br>
 		<input type="text" name="billing_zip_code" placeholder="Zip code" size="10">
 		<br>

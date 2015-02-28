@@ -2,7 +2,7 @@ from hashlib import sha256
 from time import time
 from base64 import b64encode
 
-expiration_delay = 30  # number of seconds it takes for a link to expire
+expiration_delay = 5400  # number of seconds it takes for a link to expire
 
 
 def create_hash(phone_number, expiration_time, password, secret_key):
@@ -19,7 +19,7 @@ def create_queries(phone_number, password, secret_key):
     return expiration_time, create_hash(phone_number, expiration_time, password, secret_key)
 
 
-def test_hash(phone_number, expiration_time, password, hash, secret_key):
+def test_hash(phone_number, expiration_time, password, request_hash, secret_key):
     # Make sure this link hasn't expired
     try:
         exp_time = int(expiration_time)
@@ -29,7 +29,6 @@ def test_hash(phone_number, expiration_time, password, hash, secret_key):
         return False
     # Make sure the hash is valid
     test = create_hash(phone_number, expiration_time, password, secret_key)
-    print test
-    if test != hash:
+    if test != request_hash:
         return False
     return True
