@@ -1,3 +1,5 @@
 flask==0.10.1
 twilio==3.7.2
 ordrin==1.0.6
+flask-sqlalchemy==2.0
+psycopg2==2.6
