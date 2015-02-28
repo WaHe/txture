@@ -1,0 +1,82 @@
+{% extends "wrapper.html" %}
+{% block title %}txture - update information{% endblock %}
+{% block head %}
+{{ super() }}
+{% endblock %}
+{% block content %}
+<h1>txture</h1>
+<h2>Hi there! Thanks for using txture. Please enter some information so we can deliver food to you.</h2>
+{% if error != None %}
+<h2 style="color:red">{{error}}</h2>
+{% endif %}
+<form method="post" action="" class="update-form">
+	<fieldset>
+		<legend>Basic Information</legend>
+		<input type="text" name="first_name" placeholder="First name"
+		       value="{{user.first_name if user.first_name != None}}" size="50">
+		<br>
+		<input type="text" name="last_name" placeholder="Last name" value="{{user.last_name if user.last_name != None}}"
+		       size="50">
+		<br>
+		<input type="text" name="email" placeholder="Email" value="{{user.email if user.email != None}}" size="50">
+		<br>
+	</fieldset>
+	<fieldset>
+		<legend>Delivery address</legend>
+		<input type="text" name="delivery_address_line_1" placeholder="Delivery address line 1"
+		       value="{{delivery_address.address_line_1 if delivery_address.address_line_1 != None}}" size="50">
+		<br>
+		<input type="text" name="delivery_address_line_2" placeholder="Delivery address line 2"
+		       value="{{delivery_address.address_line_2 if delivery_address.address_line_2 != None}}" size="50">
+		<br>
+		<input type="text" name="delivery_city" placeholder="City"
+		       value="{{delivery_address.city if delivery_address.city != None}}">
+		<br>
+		<input type="text" name="delivery_zip_code" placeholder="Zip code"
+		       value="{{delivery_address.zip_code if delivery_address.zip_code != None}}" size="10">
+		<br>
+	</fieldset>
+	<fieldset>
+		<legend>Credit card</legend>
+		txture doesn't store your credit card information.
+		<br>
+		<br>
+		<input type="text" name="name_on_card" placeholder="Name on card" size="50">
+		<br>
+		<input type="text" name="card_number" placeholder="Card number" size="16">
+		<br>
+		<label for="exp-month">Expiration date</label>
+		<select name="expiry_month" id="exp-month">
+			<option value="01">January</option>
+			<option value="02">February</option>
+			<option value="03">March</option>
+			<option value="04">April</option>
+			<option value="05">May</option>
+			<option value="06">June</option>
+			<option value="07">July</option>
+			<option value="08">August</option>
+			<option value="09">September</option>
+			<option value="10">October</option>
+			<option value="11">November</option>
+			<option value="12">December</option>
+		</select>
+		<input type="text" name="expiry_year" placeholder="Year" size="4">
+		<br>
+		<input type="text" name="security_code" placeholder="CVC" size="3">
+		<br>
+	</fieldset>
+	<fieldset>
+		<legend>Billing address</legend>
+		<input type="text" name="billing_address_line_1" placeholder="Billing address line 1" size="50">
+		<br>
+		<input type="text" name="billing_address_line_2" placeholder="Billing address line 2" size="50">
+		<br>
+		<input type="text" name="billing_city" placeholder="City">
+		<br>
+		<input type="text" name="billing_zip_code" placeholder="Zip code" size="10">
+		<br>
+		<br>
+	</fieldset>
+	<input type="submit" value="Submit">
+</form>
+{% endblock %}
