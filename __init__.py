@@ -1,5 +1,6 @@
 from flask import Flask
-import twilio
+import twilio.rest
+import twilio.twiml
 
 
 app = Flask(__name__)
@@ -11,7 +12,7 @@ def hello():
 @app.route("/twiltest")
 def twiltest():
     # Find these values at https://twilio.com/user/account
-    client = twilio.TwilioRestClient(app.twilio_sid, app.twilio_token)
+    client = twilio.rest.TwilioRestClient(app.twilio_sid, app.twilio_token)
 
     message = client.messages.create(to="+14157862965", from_=app.twilio_number,
                                      body="Hello there!")
