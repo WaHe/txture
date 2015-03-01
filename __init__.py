@@ -14,7 +14,6 @@ import datetime
 
 from helpers.secure_update import create_queries, test_hash
 from helpers.messages import init_confirm
-from helpers.conversation import process_input
 from helpers.reformat_phone import reformat_phone
 from states import State
 import settings
@@ -67,12 +66,16 @@ class Conversation(db.Model):
     delivery_time = db.Column(db.Integer)
     delivery_address = db.Column(db.Integer, db.ForeignKey('address.id'))
     food_string = db.Column(db.String)
+    restaurant_id = db.Column(db.String)
+    restaurant_name = db.Column(db.String)
 
     user_phone_number = db.Column(db.String, db.ForeignKey('user.phone_number'), nullable=False)
     creation_date = db.Column(db.DateTime, nullable=False)
 
     def __init__(self, user_phone_number):
         self.user_phone_number = user_phone_number
+
+from helpers.conversation import process_input
 
 
 def get_update_link(phone_number, password):
