@@ -68,7 +68,6 @@ def valid_processor(message, user, conversation, db):
                          conversation.deliverer_phone_number + " if there are any issues.")
         except HTTPError as e:
             resp.message("Sorry, there was an issue placing your order :/")
-            print val
             print e.response.text
             print e.message
         db.session.commit()
