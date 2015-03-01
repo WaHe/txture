@@ -6,11 +6,11 @@ from hashlib import sha256
 from requests import HTTPError
 from base64 import b64encode
 from twilio.util import RequestValidator
+
 import ordrin
 import twilio.rest
 import twilio.twiml
 import datetime
-
 
 from helpers.secure_update import create_queries, test_hash
 from helpers.messages import init_confirm
@@ -75,7 +75,7 @@ class Conversation(db.Model):
     def __init__(self, user_phone_number):
         self.user_phone_number = user_phone_number
 
-from helpers.conversation import process_input
+from conversation import process_input
 
 
 def get_update_link(phone_number, password):
