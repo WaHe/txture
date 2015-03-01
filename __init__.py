@@ -105,7 +105,8 @@ def twilio_receive():
     sig_header = request.headers.get('X-Twilio-Signature', '')
     if not validator.validate(request.url, request.form, sig_header):
         print "This request is not valid!"
-        # return abort(401, 'Request signature was not valid.') TODO: uncomment this
+        if settings.require_twilio_validation:
+            return abort(401, 'Request signature was not valid.')
     else:
         print "This is a valid request :D"
 

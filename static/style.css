@@ -7,6 +7,12 @@ html, body {
     width: 100%;
 }
 
+.demo-image {
+    width:100%;
+    max-width:300px;
+    margin: 20px;
+}
+
 .copy-list {
     font-size: 2em;
 }
