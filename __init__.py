@@ -7,7 +7,6 @@ from requests import HTTPError
 from base64 import b64encode
 from twilio.util import RequestValidator
 
-import ordrin
 import twilio.rest
 import twilio.twiml
 import datetime
@@ -16,6 +15,7 @@ from helpers.secure_update import create_queries, test_hash
 from helpers.messages import init_confirm
 from helpers.reformat_phone import reformat_phone
 from states import State
+from setup_api import ordrin_api
 import settings
 
 
@@ -23,8 +23,6 @@ import settings
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = settings.database_url
 db = SQLAlchemy(app)
-
-ordrin_api = ordrin.APIs(settings.ordrin_key, settings.ordrin_mode)
 
 
 class User(db.Model):
