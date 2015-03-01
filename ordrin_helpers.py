@@ -65,18 +65,20 @@ def match_food_item(nouns, preps, address):
 
     # Get items from ordrin API
     menu_items = {}
-    for restaurant in restaurant_list:
-        print restaurant['na']
-        print restaurant['id']
-        rest_details = ordrin_api.restaurant_details(str(restaurant['id']))
-        if len(preps) > 0:
-            print preps
+    if len(preps) > 0:
+        names = dict((restaurant['na'], restaurant['id']) for restaurant in restaurant_list)
+        match = process.extractOne(" ".join(preps), names.keys())
+        restaurant_name = match[0]
+        restaurant_id = names[restaurant_name]
+        restaurant_details = ordrin_api.restaurant_details(str(names[match[0]]))
+        for item in restaurant_details['menu']:
+            parse_menu_tree(item, restaurant_name, restaurant_id, menu_items, [], '', 0)
+    else:
+        for restaurant in restaurant_list:
             print restaurant['na']
-            if fuzz.ratio(" ".join(preps), restaurant['na']) > 70:
-                for item in rest_details['menu']:
-                    parse_menu_tree(item, restaurant['na'], restaurant['id'], menu_items, [], '', 0)
-        else:
-            for item in rest_details['menu']:
+            print restaurant['id']
+            restaurant_details = ordrin_api.restaurant_details(str(restaurant['id']))
+            for item in restaurant_details['menu']:
                 parse_menu_tree(item, restaurant['na'], restaurant['id'], menu_items, [], '', 0)
 
     # Fuzzy match long list

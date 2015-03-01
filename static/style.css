@@ -1,7 +1,15 @@
 html, body {
-    font-family: "Helvetica Neue Light", "HelveticaNeue-Light", "Helvetica Neue", Calibri, Helvetica, Arial;
+    font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, FreeSerif, serif;
 }
 
+.logo {
+    max-width: 400px;
+    width: 100%;
+}
+
+.copy-list {
+    font-size: 2em;
+}
 
 .update-form {
     max-width: 500px;

@@ -4,6 +4,7 @@ from ordrin_helpers import match_food_item, place_order
 import twilio.twiml
 from helpers.nlp_parse import nlp_parse
 from setup_api import ordrin_api
+from helpers.messages import order_confirm
 
 # TODO: fix the results of all of these functions
 
@@ -23,10 +24,11 @@ postive_responses = {"yes", "yeah", "sure", "ok"}
 
 negative_responses = {"no", "don't", "dont", "stop", "wait"}
 
+
 def wait_processor(message, user, conversation, db):
     nouns, preps = nlp_parse(message)
-    matched_food = match_food_item(nouns, preps, user.delivery_addresses[0])
     if nouns is not None and preps is not None:
+        matched_food = match_food_item(nouns, preps, user.delivery_addresses[0])
         conversation.state = State.VALID_REQUEST
         resp = twilio.twiml.Response()
         price = matched_food['price'] / 100.0
@@ -34,9 +36,8 @@ def wait_processor(message, user, conversation, db):
         address = user.delivery_addresses[0]
         fee_data = ordrin_api.fee('ASAP', matched_food['restaurant_id'], "%.2f" % (price / 100), "%.2f" % (tip / 100),
                                   address.address_line_1, address.city, address.zip_code)
-        resp.message("How does a " + matched_food['name'] + " from " + matched_food['restaurant_name'] +
-                     " Sound? That would cost $" + "%.2f" % (price + tip) + ", and should be delivered in " +
-                     fee_data['del'] + " minutes.")
+        resp.message(order_confirm(matched_food['name'], matched_food['restaurant_name'], "%.2f" % (price + tip),
+                                   fee_data['del']))
         conversation.food_string = matched_food['item'] + '/1,' + matched_food['options']
         conversation.price = matched_food['price']
         conversation.restaurant_id = matched_food['restaurant_id']

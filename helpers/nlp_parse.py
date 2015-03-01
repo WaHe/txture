@@ -2,7 +2,7 @@ from pattern.en import parsetree, lemma
 
 
 invalid_noun = {'DT', 'PRP'}
-valid_verbs = {'get', 'have', 'take', 'deliver', 'obtain'}
+valid_verbs = {'get', 'have', 'take', 'deliver', 'obtain', 'want', 'need', 'desire'}
 valid_prepositions = {'at', 'from', 'in', 'via'}
 ignore_nouns = {'i', 'me', 'my', 'myself', 'mine'}
 
