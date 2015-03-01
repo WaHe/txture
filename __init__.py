@@ -24,7 +24,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = settings.database_url
 db = SQLAlchemy(app)
 
-ordrin_api = ordrin.APIs(settings.ordrin_key, ordrin.TEST)
+ordrin_api = ordrin.APIs(settings.ordrin_key, settings.ordrin_mode)
 
 
 class User(db.Model):
@@ -220,6 +220,7 @@ def update_form():
                 return render_template('u.html', user=user, delivery_address=d, billing_address=b, error=error)
             d.user_phone_number = user.phone_number
             user.initialized = True
+
             # Set up the new conversation
             conv = Conversation(user.phone_number)
             conv.delivery_address = d.id

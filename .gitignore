@@ -56,5 +56,5 @@ target/
 # IntelliJ stuff
 *.iml
 .idea
-secrets.py
+settings.py
 venv
