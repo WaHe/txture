@@ -1,18 +1,23 @@
 from flask import Flask, request, render_template, abort
 from flask.ext.sqlalchemy import SQLAlchemy
-from helpers.secure_update import create_queries, test_hash
-from helpers.messages import get_init_confirm
 from urllib import urlencode
 from collections import OrderedDict
-from states import State
 from hashlib import sha256
 from requests import HTTPError
 from base64 import b64encode
+from twilio.util import RequestValidator
 import ordrin
 import twilio.rest
 import twilio.twiml
+import datetime
+
+
+from helpers.secure_update import create_queries, test_hash
+from helpers.messages import init_confirm
+from helpers.conversation import process_input
+from states import State
 import settings
-from twilio.util import RequestValidator
+
 
 
 app = Flask(__name__)
@@ -21,11 +26,12 @@ db = SQLAlchemy(app)
 
 ordrin_api = ordrin.APIs(settings.ordrin_key, ordrin.TEST)
 
+
 class User(db.Model):
     phone_number = db.Column(db.String(16), primary_key=True)
     initialized = db.Column(db.Boolean, nullable=False, default=False)
     email = db.Column(db.String, unique=True)
-    password = db.Column(db.String)
+    password = db.Column(db.String, default='')
     first_name = db.Column(db.String)
     last_name = db.Column(db.String)
     delivery_addresses = db.relationship('Address', backref='user', lazy='joined')
@@ -61,6 +67,7 @@ class Conversation(db.Model):
     delivery_address = db.Column(db.Integer, db.ForeignKey('address.id'))
     user_phone_number = db.Column(db.String, db.ForeignKey('user.phone_number'), nullable=False)
     food_items = db.relationship('Food', backref='conversation', lazy='joined')
+    creation_date = db.Column(db.DateTime, nullable=False)
 
     def __init__(self, user_phone_number):
         self.user_phone_number = user_phone_number
@@ -77,9 +84,9 @@ class Food(db.Model):
 
 
 def get_update_link(phone_number, password):
-    initial_url = app.base_url + "/u"
+    initial_url = settings.base_url + "/u"
     p = phone_number
-    e, h = create_queries(p, password, app.secret_reset_key)
+    e, h = create_queries(p, password, settings.secret_reset_key)
     query_string = urlencode(OrderedDict(p=p, e=e, h=h))
     return initial_url + "?" + query_string
 
@@ -109,7 +116,7 @@ def twilio_receive():
     from_number = request.values.get('From', None)
     user = User.query.filter_by(phone_number=from_number).first()
     if user is None:
-        # Add a new user if this phone number isn't alreay in the database
+        # Add a new user if this phone number isn't already in the database
         user = User(from_number)
         db.session.add(user)
         db.session.commit()
@@ -117,8 +124,11 @@ def twilio_receive():
         resp = twilio.twiml.Response()
         resp.message("Hi! welcome to txture. Set up your info here: " + get_update_link(from_number, user.password))
         return str(resp)
-    resp = twilio.twiml.Response()
-    resp.message("Hello, you! You've already been init'd.")
+    if len(user.conversations) > 0:
+        conv = user.conversations[0]  # TODO: there may be an issue here
+    else:
+        conv = None
+    resp = process_input(request.values.get('Body'), user, conv, db)
     return str(resp)
 
 
@@ -155,7 +165,7 @@ def update_form():
     password = user.password if user.password is not None else ''
 
     # Fail if the url was invalid
-    if not test_hash(phone_number, expiration_time, password, request_hash, app.secret_reset_key):
+    if not test_hash(phone_number, expiration_time, password, request_hash, settings.secret_reset_key):
         return render_template('url-failure.html')
 
     error = None
@@ -163,7 +173,7 @@ def update_form():
     b = Address("billing")
     if request.method == 'POST':
         if not user.initialized:
-            client = twilio.rest.TwilioRestClient(app.twilio_sid, app.twilio_token)
+            client = twilio.rest.TwilioRestClient(settings.twilio_sid, settings.twilio_token)
             print "got here"
             print request.form['email']
             print request.form['password']
@@ -186,7 +196,7 @@ def update_form():
 
             # Try creating the address
             try:
-                ordrin_api.create_addr(user.email, 'default', user.phone_number.replace('+', '')[1:], d.zip_code,
+                ordrin_api.create_addr(user.email, d.name, user.phone_number.replace('+', '')[1:], d.zip_code,
                                        d.address_line_1, d.city, d.state, user.password, addr2=d.address_line_2)
             except HTTPError as e:
                 error = e.response.text
@@ -211,8 +221,17 @@ def update_form():
             except HTTPError as e:
                 error = e.response.text
                 return render_template('u.html', user=user, delivery_address=d, billing_address=b, error=error)
-            client.messages.create(to=user.phone_number, from_=app.twilio_number, body=get_init_confirm())
+            d.user_phone_number = user.phone_number
+            user.initialized = True
+            # Set up the new conversation
+            conv = Conversation(user.phone_number)
+            conv.delivery_address = d.id
+            conv.creation_date = datetime.datetime.utcnow()
+            conv.state = State.WAIT
+            db.session.add(d)
+            db.session.add(conv)
             db.session.commit()
+            client.messages.create(to=user.phone_number, from_=settings.twilio_number, body=init_confirm())
         return render_template('success.html')
     return render_template('u.html', user=user, delivery_address=d, billing_address=b, error=error)
 
