@@ -1,9 +1,10 @@
 from pattern.en import parsetree, lemma
 
 
-invalid_noun = {'DT'}
+invalid_noun = {'DT', 'PRP'}
 valid_verbs = {'get', 'have', 'take', 'deliver', 'obtain'}
 valid_prepositions = {'at', 'from', 'in', 'via'}
+ignore_nouns = {'i', 'me', 'my', 'myself', 'mine'}
 
 
 def nlp_parse(s):
@@ -14,8 +15,7 @@ def nlp_parse(s):
     sentence = s[0]
     last_np = None
     prep = None
-    valid_preps = True
-    prep_np = None
+    prep_nps = []
     sentence_invalid = False
     included_verbs = []
     for chunk in sentence.chunks:
@@ -25,28 +25,30 @@ def nlp_parse(s):
                            [word for word in chunk.words if word.pos == 'IN'])):
                 print "Invalid preps"
                 return None, None
-        if chunk.type == 'NP':
+        elif chunk.type == 'NP':
             if prep is None:
                 last_np = chunk
-            elif prep_np is None:
-                prep_np = chunk
             else:
-                sentence_invalid = True
-        if chunk.type == 'VP':
+                prep_nps += chunk.words
+        elif chunk.type != 'NP' and prep is not None:
+            print "something after a preposition that's not a noun"
+            return None, None
+        elif chunk.type == 'VP':
             included_verbs += [word.string for word in chunk.words if word.pos.startswith('VB')]
         print chunk.type + ":", [word for word in chunk.words]
 
     if last_np is None:
+        print "no noun"
         sentence_invalid = True
-    if prep is not None and prep_np is None:
+    if prep is not None and len(prep_nps) == 0:
+        print "preposition not followed by noun"
         sentence_invalid = True
 
     if sentence_invalid:
-        print "invalid sentence"
         return None, None
     else:
-        preposition_string = [word.string for word in prep_np if word.pos not in invalid_noun]\
-            if prep_np is not None else []
+        print
+        preposition_string = [word.string for word in prep_nps if word.pos not in invalid_noun]
         noun_string = [word.string for word in last_np.words if word.pos not in invalid_noun]
         print 'nouns:', noun_string, 'preps:', preposition_string, 'verbs:', included_verbs
         # No valid verbs
