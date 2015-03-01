@@ -15,6 +15,7 @@ import datetime
 from helpers.secure_update import create_queries, test_hash
 from helpers.messages import init_confirm
 from helpers.conversation import process_input
+from helpers.reformat_phone import reformat_phone
 from states import State
 import settings
 
@@ -65,22 +66,13 @@ class Conversation(db.Model):
     deliverer_phone_number = db.Column(db.String)
     delivery_time = db.Column(db.Integer)
     delivery_address = db.Column(db.Integer, db.ForeignKey('address.id'))
+    food_string = db.Column(db.String)
+
     user_phone_number = db.Column(db.String, db.ForeignKey('user.phone_number'), nullable=False)
-    food_items = db.relationship('Food', backref='conversation', lazy='joined')
     creation_date = db.Column(db.DateTime, nullable=False)
 
     def __init__(self, user_phone_number):
         self.user_phone_number = user_phone_number
-
-
-class Food(db.Model):
-    ordrin_id = db.Column(db.String, nullable=False, primary_key=True)
-    quantity = db.Column(db.Integer, nullable=False, default=1)
-    conversation_id = db.Column(db.Integer, db.ForeignKey('conversation.id'), nullable=False, primary_key=True)
-
-    def __init__(self, ordrin_id, conversation_id):
-        self.ordrin_id = ordrin_id
-        self.conversation_id = conversation_id
 
 
 def get_update_link(phone_number, password):
@@ -112,6 +104,8 @@ def twilio_receive():
     if not validator.validate(request.url, request.form, sig_header):
         print "This request is not valid!"
         # return abort(401, 'Request signature was not valid.') TODO: uncomment this
+    else:
+        print "This is a valid request :D"
 
     from_number = request.values.get('From', None)
     user = User.query.filter_by(phone_number=from_number).first()
@@ -214,7 +208,7 @@ def update_form():
                                      request.form.get('billing_city', None),
                                      request.form.get('billing_state', None),
                                      request.form.get('billing_zip_code', None),
-                                     user.phone_number.replace('+', '')[1:],
+                                     reformat_phone(user.phone_number),
                                      user.password,
                                      bill_addr2=request.form.get('billing_address_line_2', None)
                                      )
