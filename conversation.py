@@ -5,6 +5,7 @@ import twilio.twiml
 from helpers.nlp_parse import nlp_parse
 from setup_api import ordrin_api
 from helpers.messages import order_confirm, misunderstood_order
+import string
 
 # TODO: fix the results of all of these functions
 
@@ -53,7 +54,8 @@ def wait_processor(message, user, conversation, db):
 
 
 def valid_processor(message, user, conversation, db):
-    if message.lower() in postive_responses:
+    formatted_message = message.lower().strip().strip(string.punctuation)
+    if formatted_message in postive_responses:
         conversation.state = State.WAIT
         resp = twilio.twiml.Response()
         try:
@@ -69,7 +71,7 @@ def valid_processor(message, user, conversation, db):
             print e.response.text
         db.session.commit()
         return resp
-    elif message.lower() in negative_responses:
+    elif formatted_message in negative_responses:
         conversation.state = State.WAIT
         resp = twilio.twiml.Response()
         resp.message("Ok! I just cancelled your order.")
