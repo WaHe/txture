@@ -61,14 +61,16 @@ def valid_processor(message, user, conversation, db):
         try:
             print ((conversation.price / 100) * 0.15)
             print conversation.food_string
-            place_order(conversation.restaurant_id, conversation.food_string,
+            val = place_order(conversation.restaurant_id, conversation.food_string,
                         "%.2f" % ((conversation.price / 100) * 0.15),
                         user, user.delivery_addresses[0])
             resp.message("Awesome! That should be delivered soon. Call the restaurant at " +
                          conversation.deliverer_phone_number + " if there are any issues.")
         except HTTPError as e:
             resp.message("Sorry, there was an issue placing your order :/")
+            print val
             print e.response.text
+            print e.message
         db.session.commit()
         return resp
     elif formatted_message in negative_responses:
