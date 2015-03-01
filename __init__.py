@@ -75,8 +75,6 @@ class Conversation(db.Model):
     def __init__(self, user_phone_number):
         self.user_phone_number = user_phone_number
 
-from conversation import process_input
-
 
 def get_update_link(phone_number, password):
     initial_url = settings.base_url + "/u"
@@ -97,6 +95,9 @@ def index():
 def users():
     uses = User.query.all()
     return str(uses)
+
+
+from conversation import process_input
 
 
 @app.route("/tw", methods=['POST'])
