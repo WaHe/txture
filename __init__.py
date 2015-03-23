@@ -89,12 +89,6 @@ def index():
     return render_template('index.html')
 
 
-@app.route("/users")
-def users():
-    uses = User.query.all()
-    return str(uses)
-
-
 from conversation import process_input
 
 
